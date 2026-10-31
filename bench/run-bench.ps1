@@ -10,10 +10,17 @@
 
 $ErrorActionPreference = "Continue"
 
-# 向上找到仓库根（含 docs\results.json 的那一层）
-$root = if($CasesFile){ Split-Path $CasesFile -Parent } else { $PSScriptRoot }
-while($root -and -not (Test-Path (Join-Path $root "docs\results.json"))){ $root = Split-Path $root -Parent }
+# 仓库根：用脚本位置推（绝对路径）
+$root = Split-Path $PSScriptRoot -Parent
+if(-not (Test-Path (Join-Path $root "docs\results.json"))){
+  $probe = $PSScriptRoot
+  while($probe -and -not (Test-Path (Join-Path $probe "docs\results.json"))){ $probe = Split-Path $probe -Parent }
+  $root = $probe
+}
 if(-not $root){ throw "找不到仓库根（需要 docs\results.json）" }
+$root = [IO.Path]::GetFullPath($root)
+# [IO.File]/[IO.Directory] 用的是进程当前目录，Set-Location 改不动它，必须显式对齐
+[Environment]::CurrentDirectory = $root
 $bench = Join-Path $root "bench"
 
 if(-not $CasesFile){ $CasesFile = Join-Path $bench "cases-user.json" }

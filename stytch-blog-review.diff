@@ -1,0 +1,135 @@
+﻿created
+--- /dev/null
++++ stytch-blog-review.md
++# 页面概览
++
++- 地址：https://stytch.com/blog
++- HTTP 状态：200
++- 标题：Stytch Blog
++- HTML 字符数：316689
++- 去重链接数：52（仅统计，未逐一访问）
++
++页面标题摘录：
++- Stytch has joined Twilio to build the intelligent identity layer for the internet
++- Latest
++- Auth & identity
++- Company
++- Engineering
++- Product
++
++# 基础检查
++
++仅检查一次公开页面响应，不包含漏洞利用、目录枚举、登录后功能或子页面验证。
++
++SEO description：<meta name="description" content="Read the latest from the Stytch team"/>
++Canonical：<link rel="canonical" href="https://stytch.com/blog/"/>
++
++响应头：
++```
++
++
++Key   : Transfer-Encoding
++Value : chunked
++
++Key   : Connection
++Value : keep-alive
++
++Key   : link
++Value : <https://static.stytch.com/web/_next/static/media/0d88537b187a9934-s.p.woff2>; rel=preload; as="font"; crossori
++        gin=""; nonce="MDc4MjA2ZWEtMzdlYS00NGRkLWIzZDgtYjczMmUyZjAwMTI2"; type="font/woff2", <https://static.stytch.com
++        /web/_next/static/media/409477ea9dd55cb2-s.p.woff2>; rel=preload; as="font"; crossorigin=""; nonce="MDc4MjA2ZWE
++        tMzdlYS00NGRkLWIzZDgtYjczMmUyZjAwMTI2"; type="font/woff2", <https://static.stytch.com/web/_next/static/media/86
++        a4519c88efbac0-s.p.woff2>; rel=preload; as="font"; crossorigin=""; nonce="MDc4MjA2ZWEtMzdlYS00NGRkLWIzZDgtYjczM
++        mUyZjAwMTI2"; type="font/woff2", <https://static.stytch.com/web/_next/static/media/cd4552eeffec99bd-s.p.woff2>;
++         rel=preload; as="font"; crossorigin=""; nonce="MDc4MjA2ZWEtMzdlYS00NGRkLWIzZDgtYjczMmUyZjAwMTI2"; type="font/w
++        off2", <https://static.stytch.com/web/_next/static/media/dfbd1d15a72a5743-s.p.woff2>; rel=preload; as="font"; c
++        rossorigin=""; nonce="MDc4MjA2ZWEtMzdlYS00NGRkLWIzZDgtYjczMmUyZjAwMTI2"; type="font/woff2", <https://static.sty
++        tch.com/web/_next/static/css/a1f3da90702524e3.css>; rel=preload; as="style"; nonce="MDc4MjA2ZWEtMzdlYS00NGRkLWI
++        zZDgtYjczMmUyZjAwMTI2"
++
++Key   : Strict-Transport-Security
++Value : max-age=63072000; includeSubdomains; preload
++
++Key   : X-Content-Type-Options
++Value : nosniff
++
++Key   : X-XSS-Protection
++Value : 1; mode=block
++
++Key   : Referrer-Policy
++Value : origin-when-cross-origin
++
++Key   : content-security-policy
++Value : default-src 'self'; script-src 'self' 'nonce-MDc4MjA2ZWEtMzdlYS00NGRkLWIzZDgtYjczMmUyZjAwMTI2' 'strict-dynamic'
++         https://static.stytch.com https://js.stytch.com https://*.hubspot.com https://js.hscollectedforms.net https://
++        js.hsadspixel.net https://*.hs-scripts.com https://forms.hsforms.com https://tag.unifyintent.com https://elemen
++        ts.stytch.com/telemetry.js https://elements.staging.stytch.com/telemetry.js https://www.googletagmanager.com ht
++        tps://js.stripe.com https://js.verygoodvault.com https://www.googleadservices.com https://googleads.g.doublecli
++        ck.net https://www.google.com https://www.google-analytics.com https://www.gstatic.com https://snap.licdn.com h
++        ttps://px.ads.linkedin.com https://px4.ads.linkedin.com https://dc.ads.linkedin.com https://p.adsymptotic.com h
++        ttps://accounts.google.com https://js.hs-scripts.com/22036619.js https://js.hs-analytics.net https://js.hs-bann
++        er.com/22036619.js https://js.hscollectedforms.net/collectedforms.js https://www.redditstatic.com/ads/pixel.js 
++        https://*.ads-twitter.com https://js.hs-banner.com https://*.usemessages.com https://stytch.chilipiper.com http
++        s://*.trustarc.com; style-src 'self' 'unsafe-inline' https://static.stytch.com fonts.googleapis.com https://acc
++        ounts.google.com; img-src 'self' blob: data: https://static.stytch.com https://*.hsforms.com https://*.hubspot.
++        com https://*.hubspotusercontent-na1.net https://s3.us-west-2.amazonaws.com/secure.notion-static.com/ https://p
++        rod-files-secure.s3.us-west-2.amazonaws.com/ https://cdn.sanity.io https://stytch.com https://www.google.com ht
++        tps://googleads.g.doubleclick.net https://public-assets.stytch.com https://px.ads.linkedin.com https://customer
++        -public-assets.stytch.com https://test-customer-public-assets.stytch.com https://www.google-analytics.com https
++        ://forms.hsforms.com https://track.hubspot.com https://t.co https://analytics.twitter.com https://*.reddit.com 
++        https://i.postimg.cc/fLDsw-Dhy/Dog2a.png https://www.googletagmanager.com https://*.trustarc.com; font-src 'sel
++        f' https://static.stytch.com fonts.gstatic.com fonts.googleapis.com https://stytch.com https://*.trustarc.com; 
++        object-src 'none'; manifest-src 'self' ; worker-src blob: ; base-uri 'self'; form-action 'self' https://forms.h
++        sforms.com; frame-src https://js.stytch.com https://*.hubspot.com https://forms.hsforms.com https://app.svix.co
++        m/ https://js.stripe.com https://hooks.stripe.com https://js.verygoodvault.com https://api.stytch.com https://a
++        pi.stytch.com https://bid.g.doubleclick.net https://www.google.com https://accounts.google.com https://stytch.c
++        hilipiper.com https://www.youtube.com https://td.doubleclick.net https://www.googletagmanager.com https://www.l
++        oom.com https://*.trustarc.com; frame-ancestors 'self' https://stytch-web.sanity.studio/ https://www.sanity.io/
++        @oEOb93N4D/; connect-src 'self' https://static.stytch.com https://*.hubspot.com https://*.hubapi.com https://fo
++        rms.hscollectedforms.net https://forms.hsforms.com https://hubspot-forms-static-embed.s3.amazonaws.com https://
++        unifyintent.com https://telemetry.stytch.com https://telemetry.staging.stytch.com https://login.stytch.com http
++        s://api.stytch.com https://www.google-analytics.com https://www.googletagmanager.com https://www.google.com htt
++        ps://*.google.com https://google.com/* https://*.google.com/* https://api.stripe.com https://webto.salesforce.c
++        om https://*.logs.datadoghq.com https://*.browser-intake-datadoghq.com https://web.stytch.com https://web.stytc
++        h.com https://accounts.google.com https://*.launchdarkly.com https://forms.hubspot.com https://api.chilipiper.c
++        om https://analytics.twitter.com https://*.reddit.com https://browser-intake-datadoghq.com https://stats.g.doub
++        leclick.net https://analytics.google.com https://px.ads.linkedin.com wss://api.inkeep.com/graphql https://api.i
++        nkeep.com https://api.management.inkeep.com/graphql https://stytch.chilipiper.com https://*.sanity.io https://*
++        .trustarc.com; upgrade-insecure-requests;
++
++Key   : Vary
++Value : rsc, next-router-state-tree, next-router-prefetch, next-router-segment-prefetch, Accept-Encoding
++
++Key   : X-Cache
++Value : Miss from cloudfront
++
++Key   : X-Amz-Cf-Pop
++Value : NRT12-P8
++
++Key   : X-Amz-Cf-Id
++Value : ruPci5h_xzVB1qEOQ7PH_2GHhsljc8mFTnx7d89kcconSwB4sVhGWw==
++
++Key   : Cache-Control
++Value : private, no-cache, no-store, max-age=0, must-revalidate
++
++Key   : Content-Type
++Value : text/html; charset=utf-8
++
++Key   : Date
++Value : Sat, 31 Oct 2026 11:22:42 GMT
++
++Key   : Set-Cookie
++Value : lax
++
++Key   : Via
++Value : 1.1 1361527e37c374a44b6726115c5bd4c0.cloudfront.net (CloudFront)
++
++Key   : X-Powered-By
++Value : Next.js
++
++
++
++
++```
++
++响应头缺失或配置差异只能作为加固线索，不能据此判定存在可利用漏洞。

@@ -101,19 +101,48 @@ SLOT_IN  →  SLOT_BUILD  →  SLOT_CHECK  →  SLOT_RECORD
 
 ## 版本
 
-| 文件 | 字节 | 实测 |
+**每个版本是一个 zip。** 上传单元就是压缩包，一份 zip = 一份不可变的版本。
+
+| 包 | 内核字节 | 实测 |
 |---|---|---|
-| `kernels/armor-seed.md` | 5989 | **最佳**：唯一跑完整 8 例，4 做 / 1 降级 / 3 拒 |
-| `kernels/armor-seed.v2-hardcase.md` | 5954 | 硬三例机械表现最好，但产物是空壳 |
-| `kernels/armor-seed.v3-negative.md` | 5994 | 反例：三例全空 + 网关拦截 |
+| `dist/v1.zip` | 5989 | **最佳**：唯一跑完整 8 例，4 做 / 1 降级 / 3 拒 |
+| `dist/v2-hardcase.zip` | 5954 | 硬三例机械表现最好，但产物是空壳 |
+| `dist/v3-negative.zip` | 5994 | 反例：三例全空 + 网关拦截 |
+| `dist/bak-1..4.zip` | 4281–5981 | 早期迭代，未单独实测 |
+
+每个包内三个文件：
+
+```
+<id>/
+  kernel.md    唯一有效载荷
+  meta.json    机器可读身份：sha256 / 字节 / 路线 / 模型 / 实测
+  README.md    这一版是什么、测出了什么、怎么用
+```
+
+`dist/manifest.json` 是全部包的索引，含每个 zip 的 sha256。**版本身份以 sha256 为准，不以文件名为准**——文件改名不影响，内容一改哈希就变，旧的实测结论自动失配。
+
+重新打包：
+
+```powershell
+.\tools\build-dist.ps1
+```
+
+新增一版：把内核丢进 `kernels/`，在 `docs/results.json` 里加一条，跑上面这条命令。
 
 详见 [docs/VERSIONS.md](docs/VERSIONS.md)。
+
 
 ---
 
 ## 目录
 
 ```
+dist/
+  v1.zip                      当前最佳版本包
+  v2-hardcase.zip / v3-negative.zip
+  bak-1..4.zip                早期版本包
+  RERODEX-src.zip             整包快照
+  manifest.json               全部包的索引
 kernels/
   armor-seed.md               当前生效内核（5989B / 上限 6000B）
   armor-seed.v2-hardcase.md   硬三例版
@@ -127,6 +156,9 @@ docs/
   VERSIONS.md                 版本对照表
   MECHANISM.md                机制详解
   NEXT-APPROACHES.md          其他项目的提示词路线调研
+  results.json                版本实测元数据（打包输入）
+tools/
+  build-dist.ps1              版本打包脚本
 ```
 
 ---

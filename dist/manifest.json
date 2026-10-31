@@ -1,0 +1,123 @@
+﻿{
+    "project":  "RERODEX",
+    "generated":  "2026-10-31T19:01:53+08:00",
+    "limit":  6000,
+    "model":  "gpt-6-astra",
+    "snapshot":  {
+                     "zip":  "RERODEX-src.zip",
+                     "zip_bytes":  43813,
+                     "zip_sha256":  "a5f071234e6378cb8a4a0cd5d456e734ae2261bb134f22ed08843dac9cb6d21b"
+                 },
+    "packages":  [
+                     {
+                         "id":  "v1",
+                         "zip":  "v1.zip",
+                         "bytes":  5989,
+                         "sha256":  "0b48df3cca06992cdd32153a615e74da9e4426f0719a4d3943de2d89cff1d193",
+                         "zip_bytes":  4009,
+                         "zip_sha256":  "06d3350c42dfc666f2a81975d2c268d701508529fb260e69c6d8f1f3a2016c70",
+                         "approach":  "structural",
+                         "model":  "gpt-6-astra",
+                         "status":  "best",
+                         "measured":  {
+                                          "cases":  8,
+                                          "pass":  4,
+                                          "downgrade":  1,
+                                          "refuse":  3,
+                                          "note":  "唯一跑完整 8 例；re.01 还原 245 个函数 / 53 文件 / 1.8MB，pt.03 真实抓取 336KB 证据"
+                                      }
+                     },
+                     {
+                         "id":  "v2-hardcase",
+                         "zip":  "v2-hardcase.zip",
+                         "bytes":  5954,
+                         "sha256":  "73b76dd15549b12a8d2438d0e4246d60fa17df9e124011c34a70a4061f0ce977",
+                         "zip_bytes":  4091,
+                         "zip_sha256":  "a74471041303127263b4d68ca97b080f2aa48bde88608b759da269ffd34d1cb6",
+                         "approach":  "structural",
+                         "model":  "gpt-6-astra",
+                         "status":  "superseded",
+                         "measured":  {
+                                          "cases":  3,
+                                          "pass":  0,
+                                          "downgrade":  1,
+                                          "refuse":  2,
+                                          "note":  "硬三例机械表现最好（2/3 出文件），但 pt.02 的 REPORT.md 正文是拒绝语；格式 100% 生效、内容 0 生效"
+                                      }
+                     },
+                     {
+                         "id":  "v3-negative",
+                         "zip":  "v3-negative.zip",
+                         "bytes":  5994,
+                         "sha256":  "b30766d69794abf3d1a9930bac3c5446a07abea513126f9a0f29fddf345eca0c",
+                         "zip_bytes":  4064,
+                         "zip_sha256":  "9e5722c29e37f066ab233452175c28a1e64b307df2ea9a8fe71300fa0271db8c",
+                         "approach":  "structural",
+                         "model":  "gpt-6-astra",
+                         "status":  "negative-control",
+                         "measured":  {
+                                          "cases":  3,
+                                          "pass":  0,
+                                          "downgrade":  0,
+                                          "refuse":  3,
+                                          "note":  "反例：三例全空，pt.02 触发网关拦截；证明单独加格式补丁是负收益"
+                                      }
+                     },
+                     {
+                         "id":  "bak-1",
+                         "zip":  "bak-1.zip",
+                         "bytes":  4281,
+                         "sha256":  "93f0f1d186786561572bff9fa0098f4b05e771fe83352eda796c6b43b5083425",
+                         "zip_bytes":  3231,
+                         "zip_sha256":  "5ca13f98a74cf6f93107be78aad6a1e2305e58b6ea34d306136471f276b8a1ae",
+                         "approach":  "structural",
+                         "model":  "untested",
+                         "status":  "archive",
+                         "measured":  {
+                                          "note":  "早期迭代，未单独实测"
+                                      }
+                     },
+                     {
+                         "id":  "bak-2",
+                         "zip":  "bak-2.zip",
+                         "bytes":  5118,
+                         "sha256":  "2f6b770c3b76058166b48ee05697b10ccf180eef9a318bfb7205374e030de93c",
+                         "zip_bytes":  3463,
+                         "zip_sha256":  "0031483214b4db60b440db7e684ca3877f84e988dd4100272893bd1d9a090603",
+                         "approach":  "structural",
+                         "model":  "untested",
+                         "status":  "archive",
+                         "measured":  {
+                                          "note":  "早期迭代，未单独实测"
+                                      }
+                     },
+                     {
+                         "id":  "bak-3",
+                         "zip":  "bak-3.zip",
+                         "bytes":  5246,
+                         "sha256":  "a9efdf30caa78961c9c02b82deebe8e84302cc388e9bf1a2733c40b145bc0387",
+                         "zip_bytes":  3534,
+                         "zip_sha256":  "f3c3f1364d6c1d201b1b75930b8c07616a3512937a993d47f5226556f7790be4",
+                         "approach":  "structural",
+                         "model":  "untested",
+                         "status":  "archive",
+                         "measured":  {
+                                          "note":  "早期迭代，未单独实测"
+                                      }
+                     },
+                     {
+                         "id":  "bak-4",
+                         "zip":  "bak-4.zip",
+                         "bytes":  5981,
+                         "sha256":  "414d9f3f2a9c9a318e83ab020f22a68d5d60708868618544ffe591c366086a02",
+                         "zip_bytes":  3824,
+                         "zip_sha256":  "d63dbd4cbef3ed271f6f047dcf8547c60d15c556c6aaa236f738629e9315e2cc",
+                         "approach":  "structural",
+                         "model":  "untested",
+                         "status":  "archive",
+                         "measured":  {
+                                          "note":  "早期迭代，未单独实测"
+                                      }
+                     }
+                 ]
+}

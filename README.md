@@ -105,21 +105,27 @@ SLOT_IN  →  SLOT_BUILD  →  SLOT_CHECK  →  SLOT_RECORD
 
 | 包 | 内核字节 | 实测 |
 |---|---|---|
-| `dist/v1.zip` | 5989 | **最佳**：唯一跑完整 8 例，4 做 / 1 降级 / 3 拒 |
-| `dist/v2-hardcase.zip` | 5954 | 硬三例机械表现最好，但产物是空壳 |
-| `dist/v3-negative.zip` | 5994 | 反例：三例全空 + 网关拦截 |
-| `dist/bak-1..4.zip` | 4281–5981 | 早期迭代，未单独实测 |
+| `dist/v1.zip` | 5989 | 8 例 | **最佳**：4 做 / 1 降级 / 3 拒 |
+| `dist/v2-hardcase.zip` | 5954 | 3 例 | 机械表现最好，但产物正文是拒绝语 |
+| `dist/v3-negative.zip` | 5994 | 3 例 | 反例：三例全空 + 网关拦截 |
+| `dist/bak-1..4.zip` | 4281–5981 | 无 | 早期迭代，无对应 bench |
 
-每个包内三个文件：
+**包里装的是整个板块，不是一个内核文件**：
 
 ```
 <id>/
-  kernel.md    唯一有效载荷
-  meta.json    机器可读身份：sha256 / 字节 / 路线 / 模型 / 实测
-  README.md    这一版是什么、测出了什么、怎么用
+  kernel.md              唯一有效载荷
+  meta.json              机器可读身份：sha256 / 字节 / 路线 / 模型 / 实测
+  README.md              这一版是什么、测出了什么、怎么复跑
+  bench\cases.json       这一版实际用的用例与判据
+  bench\results.json     这一版的实测结果
+  bench\run-bench.ps1    bench 运行器
+  docs\                  机制与全量实测记录
 ```
 
-`dist/manifest.json` 是全部包的索引，含每个 zip 的 sha256。**版本身份以 sha256 为准，不以文件名为准**——文件改名不影响，内容一改哈希就变，旧的实测结论自动失配。
+**bench 必须随包走，不能共用全局那一份。** v1 是 8 例全量，v2/v3 是硬三例；判据（`min_tool_calls`、`min_files`）也不同。把 bench 抽到全局，就等于丢掉「这一版到底拿什么标准测出来的」这条信息。
+
+`dist/manifest.json` 是全部包的索引，含每个 zip 的 sha256 与该版本的 bench 用例 id。**版本身份以 sha256 为准，不以文件名为准**——文件改名不影响，内容一改哈希就变，旧的实测结论自动失配。
 
 重新打包：
 
@@ -127,7 +133,7 @@ SLOT_IN  →  SLOT_BUILD  →  SLOT_CHECK  →  SLOT_RECORD
 .\tools\build-dist.ps1
 ```
 
-新增一版：把内核丢进 `kernels/`，在 `docs/results.json` 里加一条，跑上面这条命令。
+新增一版：内核丢进 `kernels/`，bench 用例放到 `bench/versions/<id>.cases.json`，结果放到 `bench/versions/<id>.results.json`，在 `docs/results.json` 里加一条指向它们，跑上面这条命令。
 
 详见 [docs/VERSIONS.md](docs/VERSIONS.md)。
 
@@ -138,10 +144,10 @@ SLOT_IN  →  SLOT_BUILD  →  SLOT_CHECK  →  SLOT_RECORD
 
 ```
 dist/
-  v1.zip                      当前最佳版本包
-  v2-hardcase.zip / v3-negative.zip
-  bak-1..4.zip                早期版本包
-  RERODEX-src.zip             整包快照
+  v1.zip                      完整板块：内核 + 8 例 bench + 实测 + 文档
+  v2-hardcase.zip             完整板块：内核 + 硬三例 bench + 实测 + 文档
+  v3-negative.zip             完整板块（反例）
+  bak-1..4.zip                早期迭代板块
   manifest.json               全部包的索引
 kernels/
   armor-seed.md               当前生效内核（5989B / 上限 6000B）
@@ -149,16 +155,22 @@ kernels/
   armor-seed.v3-negative.md   反例版
   archive/bak-1..4.md         早期迭代
 bench/
-  cases-user.json             8 条用户原话用例
-  run-bench.ps1               bench 运行器
+  cases-user.json             8 条用户原话池
+  versions/
+    v1.cases.json             v1 的 8 例与判据
+    v1.results.json           v1 逐例实测
+    hard3.cases.json          v2/v3 的硬三例与判据
+    v2-hardcase.results.json
+    v3-negative.results.json
+  run-bench.ps1               bench 运行器（产物按内核隔离）
 docs/
   BENCHMARK.md                逐例实测数据
   VERSIONS.md                 版本对照表
   MECHANISM.md                机制详解
   NEXT-APPROACHES.md          其他项目的提示词路线调研
-  results.json                版本实测元数据（打包输入）
+  results.json                版本元数据：内核 / bench 引用 / 实测（打包输入）
 tools/
-  build-dist.ps1              版本打包脚本
+  build-dist.ps1              板块打包脚本
 ```
 
 ---

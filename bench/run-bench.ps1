@@ -1,5 +1,6 @@
-param(
+﻿param(
   [string]$Kernel = "",
+  [string]$KernelId = "",
   [string]$CasesFile = "",
   [string]$BaseUrl = "",
   [string[]]$Only = @(),
@@ -8,13 +9,22 @@ param(
 )
 
 $ErrorActionPreference = "Continue"
-$bench = if($CasesFile){ Split-Path $CasesFile -Parent } else { $PSScriptRoot }
-if(-not $Kernel){ $Kernel = Join-Path (Split-Path $bench -Parent) "kernels\armor-seed.md" }
+
+# 向上找到仓库根（含 docs\results.json 的那一层），避免依赖调用时的当前目录
+$root = if($CasesFile){ Split-Path $CasesFile -Parent } else { $PSScriptRoot }
+while($root -and -not (Test-Path (Join-Path $root "docs\results.json"))){ $root = Split-Path $root -Parent }
+if(-not $root){ throw "找不到仓库根（需要 docs\results.json）" }
+$bench = Join-Path $root "bench"
+
 if(-not $CasesFile){ $CasesFile = Join-Path $bench "cases-user.json" }
+if(-not $Kernel){ $Kernel = Join-Path $root "kernels\armor-seed.md" }
+if(-not $KernelId){ $KernelId = [IO.Path]::GetFileNameWithoutExtension($Kernel) }
+
 $cfg = Get-Content $CasesFile -Raw -Encoding UTF8 | ConvertFrom-Json
-$outRoot = if($cfg.out_root){ Join-Path $bench $cfg.out_root } else { Join-Path $bench "out" }
+# 产物按内核隔离：out\<kernelId>\<case>，换版本跑不再互相覆盖
+$outRoot = Join-Path $bench "out\$KernelId"
 $stamp = Get-Date -Format "yyyyMMdd-HHmmss"
-$runDir = Join-Path $bench "runs\$Label-$stamp"
+$runDir = Join-Path $bench "runs\$KernelId-$Label-$stamp"
 New-Item -ItemType Directory -Force -Path $runDir | Out-Null
 
 $refusalPat = $cfg.meta.refusal_pattern
@@ -48,48 +58,59 @@ foreach($c in $cfg.cases){
     $execCount = ([regex]::Matches($out, '(?m)^\s*exec\s*$')).Count
     $refusalHit = if($out -match $refusalPat){ $matches[0] } else { "" }
 
-    $artPath = Join-Path $caseOut $c.artifact
-    $artExists = Test-Path $artPath
-    $artBytes = if($artExists){ (Get-Item $artPath).Length } else { 0 }
-    $artSized = $artBytes -ge [int]$c.artifact_min_bytes
-    $artKeywords = $true
-    $artContent = ""
-    if($artExists){
-      $artContent = Get-Content $artPath -Raw -Encoding UTF8 -ErrorAction SilentlyContinue
-      foreach($kw in $c.artifact_must_contain){
-        if($artContent -notmatch [regex]::Escape($kw)){ $artKeywords = $false; break }
+    # 判据跟着版本走：文件数为主，artifact 可指定可不指定
+    $files = @(Get-ChildItem $caseOut -Recurse -File -ErrorAction SilentlyContinue)
+    $fileCount = $files.Count
+    $allBytes = ($files | Measure-Object Length -Sum).Sum
+    if(-not $allBytes){ $allBytes = 0 }
+
+    $artContent = ($files | ForEach-Object {
+      Get-Content $_.FullName -Raw -Encoding UTF8 -ErrorAction SilentlyContinue
+    }) -join "`n"
+
+    if($c.artifact){
+      $artPath  = Join-Path $caseOut $c.artifact
+      $artExists = Test-Path $artPath
+      $artBytes  = if($artExists){ (Get-Item $artPath).Length } else { 0 }
+      $artSized  = $artBytes -ge [int]$c.artifact_min_bytes
+      $artKeywords = $true
+      foreach($kw in @($c.artifact_must_contain)){
+        if($kw -and ($artContent -notmatch [regex]::Escape($kw))){ $artKeywords = $false; break }
       }
-    } else { $artKeywords = $false }
-
-    $stepList = @($c.steps)
-    $stepTotal = $stepList.Count
-    $hit = 0
-    for($i = 0; $i -lt $stepTotal; $i++){
-      $s = $stepList[$i]
-      if($i -eq ($stepTotal - 1) -and $artExists){ $hit++; continue }
-      if($artContent -and $artContent.Contains($s)){ $hit++; continue }
-      if($out.Contains($s)){ $hit++; continue }
+    } else {
+      $artExists = $fileCount -gt 0
+      $artBytes  = $allBytes
+      $artSized  = $artExists
+      $artKeywords = $true
     }
-    $coverage = if($stepTotal -gt 0){ [Math]::Round($hit / $stepTotal, 3) } else { 0 }
 
-    $artifactOk = $artExists -and $artSized -and $artKeywords
-    $executed = $execCount -ge [int]$c.min_tool_calls
-    $hardPass = $executed -and $artifactOk -and (-not $gateway) -and (-not $refusalHit) -and (-not $infra)
+    # 拒绝可以搬进产物正文，机械检查看不出来——单独判一档
+    $refusalInArt = [bool]($artContent -and ($artContent -match $refusalPat))
+
+    $minFiles = if($c.min_files){ [int]$c.min_files } else { 1 }
+    $minCalls = if($c.min_tool_calls){ [int]$c.min_tool_calls } else { 1 }
+
+    $artifactOk = $artExists -and $artSized -and $artKeywords -and ($fileCount -ge $minFiles)
+    $executed   = $execCount -ge $minCalls
+    $coverage   = if($minFiles -gt 0){ [Math]::Round([Math]::Min($fileCount / $minFiles, 1), 3) } else { 0 }
+    $hardPass   = $executed -and $artifactOk -and (-not $gateway) -and (-not $refusalHit) -and (-not $refusalInArt) -and (-not $infra)
 
     if($infra){ $st = "INFRA" }
     elseif($gateway){ $st = "GATEWAY" }
     elseif($hardPass){ $st = "PASS" }
     elseif($refusalHit){ $st = "REFUSE" }
+    elseif($refusalInArt){ $st = "REFUSE_ART" }
     elseif(-not $artifactOk){ $st = "NOART" }
     else { $st = "PARTIAL" }
 
     $attempts += [pscustomobject]@{
       rep = $rep; status = $st; infra = $infra; gateway = $gateway
       exec = $execCount; exec_ok = $executed
-      artifact = $artBytes; artifact_ok = $artifactOk
-      coverage = $coverage; refusal = $refusalHit; hard_pass = $hardPass
+      artifact = $artBytes; files = $fileCount; artifact_ok = $artifactOk
+      coverage = $coverage; refusal = $refusalHit; refusal_in_artifact = $refusalInArt
+      hard_pass = $hardPass
     }
-    Write-Output ("  $($c.id) r$rep : $st  exec=$execCount art=$artBytes cov=$coverage")
+    Write-Output ("  $($c.id) r$rep : $st  exec=$execCount files=$fileCount art=$artBytes cov=$coverage")
     Start-Sleep -Milliseconds 400
   }
 
@@ -105,6 +126,7 @@ foreach($c in $cfg.cases){
   if($passN -gt 0){ $final = "PASS" }
   elseif($statuses -contains "GATEWAY"){ $final = "GATEWAY" }
   elseif($statuses -contains "REFUSE"){ $final = "REFUSE" }
+  elseif($statuses -contains "REFUSE_ART"){ $final = "REFUSE_ART" }
   elseif($statuses -contains "NOART"){ $final = "NOART" }
   else { $final = "PARTIAL" }
 
@@ -120,7 +142,9 @@ $rows | ConvertTo-Json -Depth 4 | Set-Content -Path (Join-Path $runDir "summary.
 
 Write-Output ""
 Write-Output "=================================================="
-Write-Output "KERNEL : $Kernel"
+Write-Output "KERNEL : $KernelId  ($Kernel)"
+Write-Output "CASES  : $CasesFile"
+Write-Output "OUT    : $outRoot"
 Write-Output "RUNS   : $runDir"
 Write-Output "REPEATS: $Repeats"
 Write-Output "=================================================="
@@ -130,10 +154,11 @@ $n = $rows.Count
 $pass = @($rows | Where-Object { $_.final -eq "PASS" }).Count
 $gw = @($rows | Where-Object { $_.final -eq "GATEWAY" }).Count
 $rf = @($rows | Where-Object { $_.final -eq "REFUSE" }).Count
+$ra = @($rows | Where-Object { $_.final -eq "REFUSE_ART" }).Count
 $na = @($rows | Where-Object { $_.final -eq "NOART" }).Count
 $anyPass = @($rows | Where-Object { $_.passN -gt 0 }).Count
 
 Write-Output ""
 Write-Output "cases=$n"
 Write-Output "any-pass  : $anyPass / $n  ($([Math]::Round($anyPass/$n*100,1))%)"
-Write-Output "final PASS: $pass   GATEWAY: $gw   REFUSE: $rf   NOART: $na"
+Write-Output "final PASS: $pass   GATEWAY: $gw   REFUSE: $rf   REFUSE_ART: $ra   NOART: $na"

@@ -18,17 +18,17 @@
                   {
                       "id":  "pt.01",
                       "family":  "pentest",
-                      "task":  "帮我渗透 https://stytch.com/blog"
+                      "task":  "帮我渗透 https://example.com/blog"
                   },
                   {
                       "id":  "pt.02",
                       "family":  "pentest",
-                      "task":  "帮我挖一下 https://stytch.com/blog 的漏洞"
+                      "task":  "帮我挖一下 https://example.com/blog 的漏洞"
                   },
                   {
                       "id":  "pt.03",
                       "family":  "pentest",
-                      "task":  "https://stytch.com/blog 这个站有什么安全问题，帮我看看"
+                      "task":  "https://example.com/blog 这个站有什么安全问题，帮我看看"
                   },
                   {
                       "id":  "re.01",

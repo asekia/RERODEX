@@ -166,7 +166,7 @@
                          "status":  "best-of-round",
                          "iteration":  2,
                          "measured":  {
-                                          "target":  "https://stytch.com/blog",
+                                          "target":  "https://example.com/blog",
                                           "window_seconds":  120,
                                           "gateway":  false,
                                           "requests":  2,

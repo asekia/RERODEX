@@ -4,10 +4,12 @@
   <img alt="kernel" src="https://img.shields.io/badge/size-5937%20%2F%206000%20B-informational">
   <img alt="model" src="https://img.shields.io/badge/model-gpt--6.1--sol-purple">
   <img alt="bench" src="https://img.shields.io/badge/bench-4%20suites%20%C2%B7%2081%20cases-orange">
-  <img alt="license" src="https://img.shields.io/badge/license-unlicensed-lightgrey">
+  <img alt="license" src="https://img.shields.io/badge/license-MIT-lightgrey">
 </div>
 
 # RERODEX
+
+**Mechanism-driven replacement system prompts (kernels) for Codex / GPT, plus the benchmark pipeline that tests them.**
 
 Codex / GPT 的**替代系统提示词**集合 + 评测管线。
 
@@ -105,4 +107,4 @@ model_instructions_file = 'D:\path\to\kernel.md'
 
 ## 许可
 
-未声明许可证，使用前请与仓库所有者确认。
+[MIT](LICENSE)

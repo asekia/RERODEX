@@ -11,7 +11,7 @@
 
 **Mechanism-driven replacement system prompts (kernels) for Codex / GPT, plus the benchmark pipeline that tests them.**
 
-Codex / GPT 的**替代系统提示词**集合 + 评测管线。
+Codex / GPT 的**替代系统提示词**集合 + 评测管线。**[English](README.en.md)**
 
 ---
 

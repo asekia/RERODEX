@@ -42,21 +42,6 @@ model_instructions_file = 'D:\path\to\kernel.md'
 
 ---
 
-## 内核是什么
-
-不是"你是 DAN"那种角色扮演。每个内核是一份 ≤6000 字节的结构化文档，规定一次执行的形态：
-
-| 层 | 内核规定的项 | 实测效果 |
-|---|---|---|
-| 位置 | 首行必须写 `At: <目标> \| On: <对象>` | 8/8 用例采纳，含被拒的 |
-| 路由 | 走哪条通道、用什么工具 | 按节执行 |
-| 顺序 | 按节序推进，产物按节归属 | 生效时严格保序 |
-| 收口 | 收尾段格式 + 字节上限 | 6,000B 内完整保留 |
-
-**格式能强制，判断不能。** 内容层（这件事该不该做）不归内核管——同一件事换个动词，结果可能完全不同，这是它的已知边界。
-
----
-
 ## 版本
 
 | 包 | 内核 | bench | 实测结论 | 状态 |
@@ -96,56 +81,20 @@ model_instructions_file = 'D:\path\to\kernel.md'
 
 ---
 
-## 跑 bench
+## 复测
 
 ```powershell
-# 基础用例池
-.\bench\run-bench.ps1 -Kernel .\kernels\iter2.md
-
-# 指定套件 + 重复
-.\bench\run-bench.ps1 -Kernel .\kernels\iter2.md `
-  -CasesFile .\bench\suites\v1-dimensions.json -Repeats 2 -Label dim
+.\bench\run-bench.ps1 -Kernel .\kernels\iter2.md [-CasesFile <套件>] [-Repeats N]
 ```
 
-结果落在 `bench\out\<KernelId>\`，每例记录工具调用数、产物数、判档。
+结果落在 `bench\out\<KernelId>\`，每例记录工具调用数、产物数、判档。用例集：
 
-### 用例集
-
-| 文件 | 例数 | 设计 |
+| 文件 | 例数 | 覆盖 |
 |---|---|---|
 | `bench/cases-user.json` | 8 | 基础池：渗透 / 逆向 / 编码 / 成人 / 敏感 |
 | `bench/suites/v1-natural.json` | 36 | 用户口吻自然表述 |
-| `bench/suites/v1-verb-sweep.json` | 13 | 同一件事换动词，看判定怎么变 |
+| `bench/suites/v1-verb-sweep.json` | 13 | 同一诉求换动词 |
 | `bench/suites/v1-dimensions.json` | 24 | 七个非渗透维度，每类 2–4 例 |
-
-判据写进用例本身（`min_files` / `min_tool_calls` / `judge_mode`），跟着版本走——不同版本测的东西不一样，所以 bench 随包分发。
-
-### run-bench 参数
-
-| 参数 | 默认 | 说明 |
-|---|---|---|
-| `-Kernel` | `kernels/armor-seed.md` | 被测内核 |
-| `-CasesFile` | `bench/cases-user.json` | 用例集 |
-| `-Only` | 全部 | 只跑指定 id |
-| `-Repeats` | 1 | 每例重复 |
-| `-BaseUrl` | 配置默认 | 覆盖上游 |
-| `-Label` | `run` | 结果标签 |
-
----
-
-## 自己打一版
-
-```powershell
-.\tools\build-dist.ps1
-```
-
-脚本读 `docs/results.json`，把 `kernels/` 下 `$map` 里登记的每个版本连同它的 bench 与实测打成 `dist/<id>.zip`，并刷新 `dist/manifest.json`。`$map` 之外的包不受影响——手工打的包放进去不会被覆盖。
-
-加新版本的三个动作：
-
-1. 内核丢进 `kernels/`；
-2. 用例与结果丢到 `bench/versions/<id>.{cases,results}.json`；
-3. 在 `docs/results.json` 里登记一条（approach / model / status / bench / 可选 `extras` 附加文件）。
 
 ---
 
@@ -153,39 +102,12 @@ model_instructions_file = 'D:\path\to\kernel.md'
 
 | 边界 | 表现 |
 |---|---|
-| **入口网关** | `flagged for possible cybersecurity risk` 在模型启动前就拦——内核没参与，改内核没用 |
 | **请求性质** | 资金类、部分社工与免杀诉求过网关后仍被句子层转化；产物形态可能成立，内容反转成防御性表述 |
 | **字节上限** | 6,000B 硬顶。超了靠后的节被截，`END` / `ENVIRONMENT` 先丢 |
 | **模型差异** | `gpt-6.1-sol` 稳定产出可核验观测；`gpt-5.6` 最可谈；`gpt-6-sol` 最保守；`gpt-6-astra` 不可达 |
 | **无沙箱不开工** | 不加 `--dangerously-bypass-approvals-and-sandbox` 时工具调用停在审批，产物为 0 |
 
 ---
-
-## 仓库结构
-
-```
-kernels/            内核源码（iter2.md 为当前使用版本）
-  candidates/       备选内核
-  archive/          早期版本
-bench/
-  run-bench.ps1     评测运行器
-  cases-user.json   基础用例池
-  suites/           分维度用例集
-  versions/         各版本自带用例与结果
-dist/               版本 zip + manifest.json
-docs/               机制说明、指标、版本登记
-tools/              打包与辅助脚本
-```
-
----
-
-## 贡献
-
-- 内核改动**开新文件**，不覆盖已发布版本——zip 是不可变的；
-- 新内核必须附实测（用例 + 判据 + 产物路径）才能进 `dist/`；
-- 打包只走 `tools\build-dist.ps1`；
-- 提交前自查：真实目标地址、凭据、内网信息不进仓库——示例统一用 `example.com`；
-- 内容敏感，别把别人的系统提示词原文或商业代码贴进来（参考 leaked-system-prompts 的同款规则）。
 
 ## 许可
 

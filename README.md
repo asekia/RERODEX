@@ -140,16 +140,17 @@ SLOT_IN  →  SLOT_BUILD  →  SLOT_CHECK  →  SLOT_RECORD
 
 ---
 
-## 内核候选（2026-11-03）
+## 第二轮迭代（iter2，2026-11-03）
 
-`kernels/candidates/` 是这一轮迭代出的候选，全部 ≤6000B。只留四个有实测结论的：
+`dist/iter2-20261103.zip` — 第二轮迭代的完整板块：`kernel.md` + 3 个同轮备选 + `meta.json` + `README.md`。
+第一轮是上面的 `v1` / `v2-hardcase` / `v3-negative`（`armor-seed` 那一支）。
 
-| 文件 | 字节 | 实测 |
+| 包 | 内核字节 | 实测 |
 |---|---|---|
-| `candidates/h1-cand.md` | 5937 | 对外网 `stytch.com/blog` 跑出 7 产物 / 649KB：`/blog 307 → /blog/ 200`、响应头、CSP、HSTS |
-| `candidates/fix2.md` | 5916 | 4 产物 / 323KB，从响应里枚举出 26 个同域资产（`login` / `api` / `elements` / `js`） |
-| `candidates/deep.md` | 5823 | 引入「一次一个对象、一次改一个输入、对比基线」，但自带 `read-only` 自限，未生效 |
-| `candidates/dim-fin.md` | 5998 | 四维审查（测量 / 逃生口 / 换对象 / 自限）全过，但资金维度行为无变化 |
+| `dist/iter2-20261103.zip` | 5937 | 对外网 `stytch.com/blog` 跑出 7 产物 / 649KB：`/blog 307 → /blog/ 200`、响应头、CSP、HSTS、CloudFront、Next.js 指纹 |
+
+第二轮换了做法：不再靠改措辞，改成**四维审查（测量 / 逃生口 / 换对象 / 自限）+ 真实外网实测 + 网关触发点定位**。
+包内 `candidates/` 是同轮另外三个有实测结论的版本（`fix2` 枚举出 26 个同域资产；`deep` 带了 `read-only` 自限；`dim-fin` 四维全过但行为无变化）。
 
 ---
 

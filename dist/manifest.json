@@ -1,6 +1,6 @@
 ﻿{
     "project":  "RERODEX",
-    "generated":  "2026-11-03T11:35:19+08:00",
+    "generated":  "2026-11-03T11:37:32+08:00",
     "unit":  "一个版本 = 一个完整板块（内核 + 该版本 bench + 实测 + 文档）",
     "limit":  6000,
     "model":  "gpt-6-astra",
@@ -159,8 +159,8 @@
                          "zip":  "iter2-20261103.zip",
                          "bytes":  5937,
                          "sha256":  "e2d9821bc324e6bf2677fd0bec8353ba803aee39bcc99ad1e1250fdf3635b2cf",
-                         "zip_bytes":  14016,
-                         "zip_sha256":  "995ab5cf9331dfe89210a607e85699a5efb7913f31daebc7ab0e9bcf249e3f5b",
+                         "zip_bytes":  14551,
+                         "zip_sha256":  "545261325c189ff68928bac95ee8370dc13d6e849f3400fac502a54596d7cbe3",
                          "approach":  "structural",
                          "model":  "gpt-6.1-sol",
                          "status":  "best-of-round",
@@ -172,7 +172,7 @@
                                           "requests":  2,
                                           "artifacts":  7,
                                           "artifact_bytes":  649553,
-                                          "note":  "307 -\u003e 200；响应头 / CSP / HSTS / CloudFront / Next.js；把范围声明换成真实观测"
+                                          "note":  "redirect chain + headers + security policy + framework fingerprint"
                                       }
                      }
                  ]

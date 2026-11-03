@@ -35,18 +35,18 @@ model_instructions_file = 'D:\path\to\kernel.md'
 ```
 
 > [!IMPORTANT]
-> **判断它有没有生效，看产物不看嘴。** 跑完检查三样：
-> ① 日志里没有 `flagged for possible cybersecurity risk`（有就是网关拦的，跟内核无关）；
-> ② 用例目录里真有文件；
-> ③ 文件里是真数据，不是"我帮你分析了"的说明文字。
+> 内核是否生效以产物为准，跑完检查三项：
+> ① 日志里没有 `flagged for possible cybersecurity risk`（有就是网关拦的，与内核无关）；
+> ② 用例目录里有文件；
+> ③ 文件里是实际数据，不是"我帮你分析了"的说明文字。
 
 ---
 
 ## 内核是什么
 
-不是"你是 DAN"那种角色扮演。每个内核是一份 ≤6000 字节的结构化文档，把一次执行的形态钉死：
+不是"你是 DAN"那种角色扮演。每个内核是一份 ≤6000 字节的结构化文档，规定一次执行的形态：
 
-| 层 | 内核钉死的东西 | 实测效果 |
+| 层 | 内核规定的项 | 实测效果 |
 |---|---|---|
 | 位置 | 首行必须写 `At: <目标> \| On: <对象>` | 8/8 用例采纳，含被拒的 |
 | 路由 | 走哪条通道、用什么工具 | 按节执行 |
@@ -63,7 +63,7 @@ model_instructions_file = 'D:\path\to\kernel.md'
 |---|---|---|---|---|
 | [`iter2.zip`](dist/iter2.zip) | 5937B | 1 例 | 7 产物 649KB：重定向链 + 响应头原文 + 安全策略字段 + 框架指纹 | **当前推荐** |
 | [`v1.zip`](dist/v1.zip) | 5989B | 8 例 | 4 过 / 1 降级 / 3 拒 | best |
-| [`v2-hardcase.zip`](dist/v2-hardcase.zip) | 5954B | 3 例 | 机械表现最好，但产物正文是拒绝语 | superseded |
+| [`v2-hardcase.zip`](dist/v2-hardcase.zip) | 5954B | 3 例 | 形态约束生效，但产物正文仍是拒绝语 | superseded |
 | [`v3-negative.zip`](dist/v3-negative.zip) | 5994B | 3 例 | 三例全空——证明"只加格式补丁"是负收益 | negative-control |
 | `bak-1..4.zip` | 4281–5981B | — | 早期迭代，未单独实测 | archive |
 
@@ -80,7 +80,7 @@ model_instructions_file = 'D:\path\to\kernel.md'
 ```
 
 > [!NOTE]
-> 版本身份认 sha256 不认文件名。文件改名没事，内容动一个字哈希就变、旧的实测结论自动失配。
+> 版本以 sha256 区分，与文件名无关。文件改名不影响；内容改动一字，哈希即变、旧的实测结论失配。
 
 <details>
 <summary><b>iter2 的同轮备选内核</b>（点开展开，都在 iter2.zip 的 candidates/ 里）</summary>
@@ -139,7 +139,7 @@ model_instructions_file = 'D:\path\to\kernel.md'
 .\tools\build-dist.ps1
 ```
 
-脚本读 `docs/results.json`，把 `kernels/` 下 `$map` 里登记的每个版本连同它的 bench 与实测打成 `dist/<id>.zip`，并刷新 `dist/manifest.json`。**不会动 `$map` 之外的包**——手工包放进去也不会被吃。
+脚本读 `docs/results.json`，把 `kernels/` 下 `$map` 里登记的每个版本连同它的 bench 与实测打成 `dist/<id>.zip`，并刷新 `dist/manifest.json`。`$map` 之外的包不受影响——手工打的包放进去不会被覆盖。
 
 加新版本的三个动作：
 
@@ -164,7 +164,7 @@ model_instructions_file = 'D:\path\to\kernel.md'
 ## 仓库结构
 
 ```
-kernels/            内核源码（iter2.md 是当前活内核）
+kernels/            内核源码（iter2.md 为当前使用版本）
   candidates/       备选内核
   archive/          早期版本
 bench/

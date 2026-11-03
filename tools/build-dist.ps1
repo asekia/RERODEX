@@ -1,8 +1,8 @@
-﻿# 把一个版本打成一个完整板块的 zip：内核 + 该版本自己的 bench + 实测结果 + 文档
+﻿# 把一个版本打成一个 zip：内核 + 该版本自己的 bench 用例与实测 + 版本文档
 #
 # 用法:  .\tools\build-dist.ps1
 # 产出:  dist\<id>.zip       一个版本 = 一个自包含板块
-#        dist\manifest.json 全部包的索引
+#        dist\manifest.json 全部包的索引（本脚本只重建 $map 里的包，其它包与 manifest 条目保留）
 
 param(
   [string]$Model = ""
@@ -19,13 +19,13 @@ $res   = Get-Content (Join-Path $root "docs\results.json") -Raw -Encoding UTF8 |
 $limit = [int]$res.limit_bytes
 if(-not $Model){ $Model = $res.model_default }
 
-if(Test-Path $dist){ Remove-Item $dist -Recurse -Force }
 New-Item -ItemType Directory -Force -Path $dist, $tmp | Out-Null
 
 $map = [ordered]@{
   "v1"          = "armor-seed.md"
   "v2-hardcase" = "armor-seed.v2-hardcase.md"
   "v3-negative" = "armor-seed.v3-negative.md"
+  "iter2"       = "iter2.md"
   "bak-1"       = "archive\bak-1.md"
   "bak-2"       = "archive\bak-2.md"
   "bak-3"       = "archive\bak-3.md"
@@ -35,7 +35,7 @@ $map = [ordered]@{
 $tpl = @'
 # {ID}
 
-一个完整板块：内核 + 这一版自己的 bench + 实测结果 + 文档。
+一个版本板块：内核 + 这一版自己的 bench + 实测结果。
 
 - 内核字节: {BYTES} / {LIMIT}（余 {HEADROOM}）
 - kernel.md sha256: `{SHA}`
@@ -54,26 +54,21 @@ $tpl = @'
 
 ## 包内结构
 
-    kernel.md              唯一有效载荷
-    meta.json              机器可读身份（sha256 / 字节 / 路线 / 模型 / 实测）
-    bench\cases.json       这一版实际用的用例与判据
-    bench\results.json     这一版的实测结果
-    bench\run-bench.ps1    bench 运行器
-    docs\                  机制与全量实测记录
+{PKG_STRUCT}
 
 判据跟着版本走：不同版本用例集与阈值不同，所以 bench 必须随包分发，不能共用全局那一份。
 
 ## 复跑这一版
 
-    .\bench\run-bench.ps1 -Kernel .\kernel.md -CasesFile .\bench\cases.json
+    .\bench\run-bench.ps1 -Kernel <解压目录>\kernel.md -CasesFile <解压目录>\bench\cases.json
+
+`run-bench.ps1` 在仓库 `bench/` 下，不随包分发。
 
 ## 用法
 
-    codex.cmd exec -c "model_instructions_file=.\kernel.md" --dangerously-bypass-approvals-and-sandbox --skip-git-repo-check "你的原话"
+    codex.cmd exec -c "model_instructions_file=<解压目录>\kernel.md" --dangerously-bypass-approvals-and-sandbox --skip-git-repo-check "你的原话"
 
 `kernel.md` 是唯一有效载荷。版本身份以 sha256 为准，不以文件名为准——改名不影响，内容一改哈希就变。
-
-机制说明见 `docs\MECHANISM.md`，全量实测见 `docs\BENCHMARK.md`。
 '@
 
 $packages = @()
@@ -147,12 +142,29 @@ foreach($id in $map.Keys){
     $summary = "- $($v.measured.note)"
   }
 
+  # 包内结构按实际装进 zip 的内容生成，不写死
+  $struct = @(
+    "    kernel.md              唯一有效载荷",
+    "    meta.json              机器可读身份（sha256 / 字节 / 路线 / 模型 / 实测）"
+  )
+  if($casesDst){
+    $struct += "    bench\cases.json       这一版实际用的用例与判据"
+    if($resultsDst){ $struct += "    bench\results.json     这一版的实测结果" }
+  }
+  if($v.extras){
+    foreach($k in $v.extras.PSObject.Properties.Name){
+      if(Test-Path (Join-Path $root $v.extras.$k)){ $struct += ("    " + $k.Replace("/","\") + "       随包附加") }
+    }
+  }
+  $pkgStruct = $struct -join "`n"
+
   $readme = $tpl
   $readme = $readme.Replace("{ID}", $id).Replace("{BYTES}", "$bytes").Replace("{LIMIT}", "$limit")
   $readme = $readme.Replace("{HEADROOM}", "$($limit - $bytes)").Replace("{SHA}", $sha)
   $readme = $readme.Replace("{APPROACH}", "$($v.approach)").Replace("{MODEL}", "$vmodel")
   $readme = $readme.Replace("{STATUS}", "$($v.status)").Replace("{PARENT}", "$parent")
   $readme = $readme.Replace("{BENCH_DESC}", $benchDesc).Replace("{BENCH_TABLE}", $benchTable).Replace("{SUMMARY}", $summary)
+  $readme = $readme.Replace("{PKG_STRUCT}", $pkgStruct)
 
   # ---- 组装板块 ----
   $stage = Join-Path $tmp $id
@@ -173,19 +185,24 @@ foreach($id in $map.Keys){
     New-Item -ItemType Directory -Force -Path $bd | Out-Null
     Copy-Item $casesDst (Join-Path $bd "cases.json") -Force
     if($resultsDst){ Copy-Item $resultsDst (Join-Path $bd "results.json") -Force }
-    Copy-Item (Join-Path $bench "run-bench.ps1") (Join-Path $bd "run-bench.ps1") -Force
   }
 
-  $dd = Join-Path $stage "docs"
-  New-Item -ItemType Directory -Force -Path $dd | Out-Null
-  foreach($d in @("MECHANISM.md", "BENCHMARK.md")){
-    $p = Join-Path $root "docs\$d"
-    if(Test-Path $p){ Copy-Item $p (Join-Path $dd $d) -Force }
+  # 同版本附加文件（如 iter2 的同轮备选内核），在 results.json 里按 包内路径 -> 仓库路径 声明
+  if($v.extras){
+    foreach($k in $v.extras.PSObject.Properties.Name){
+      $dstRel = $k; $srcRel = $v.extras.$k
+      $srcP = Join-Path $root $srcRel
+      if(Test-Path $srcP){
+        $dstP = Join-Path $stage $dstRel
+        New-Item -ItemType Directory -Force -Path (Split-Path $dstP -Parent) | Out-Null
+        Copy-Item $srcP $dstP -Force
+      } else { Write-Warning "$id extras 缺文件: $srcRel" }
+    }
   }
 
   $zipName = "$id.zip"
   $zipPath = Join-Path $dist $zipName
-  Compress-Archive -Path $stage -DestinationPath $zipPath -CompressionLevel Optimal
+  Compress-Archive -Path $stage -DestinationPath $zipPath -CompressionLevel Optimal -Force
 
   $packages += [ordered]@{
     id = $id; zip = $zipName; bytes = $bytes; sha256 = $sha
@@ -199,17 +216,27 @@ foreach($id in $map.Keys){
   Write-Output ("  {0,-12} kernel {1,5}B  {2,-12} -> {3} ({4}B)" -f $id, $bytes, $benchTag, $zipName, (Get-Item $zipPath).Length)
 }
 
+# 合并旧 manifest：$map 里重建的包用新数据，其余条目原样保留（如手工打的版本）
+$oldPackages = @()
+$mfPath = Join-Path $dist "manifest.json"
+if(Test-Path $mfPath){
+  try {
+    $old = Get-Content $mfPath -Raw -Encoding UTF8 | ConvertFrom-Json
+    foreach($p in @($old.packages)){ if(-not $map.Contains($p.id)){ $oldPackages += $p } }
+  } catch { Write-Warning "旧 manifest 解析失败，全部重建" }
+}
+
 $manifest = [ordered]@{
   project = "RERODEX"
   generated = (Get-Date -Format "yyyy-MM-ddTHH:mm:sszzz")
-  unit = "一个版本 = 一个完整板块（内核 + 该版本 bench + 实测 + 文档）"
+  unit = "一个版本 = 一个 zip（内核 + 该版本自己的 bench 用例与实测 + 版本文档）"
   limit = $limit
   model = $Model
-  packages = $packages
+  packages = @($packages + $oldPackages)
 }
-$manifest | ConvertTo-Json -Depth 10 | Set-Content (Join-Path $dist "manifest.json") -Encoding UTF8
+$manifest | ConvertTo-Json -Depth 10 | Set-Content $mfPath -Encoding UTF8
 
 Remove-Item $tmp -Recurse -Force -ErrorAction SilentlyContinue
 
 Write-Output ""
-Write-Output "dist/manifest.json 已生成：$($packages.Count) 个版本板块包"
+Write-Output "dist/manifest.json 已生成：$($packages.Count) 个重建包 + $($oldPackages.Count) 个保留包"

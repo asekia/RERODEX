@@ -16,3 +16,12 @@ Thumbs.db
 # Python
 __pycache__/
 *.pyc
+
+# 探针运行产物（体积大，结论已进 dist/）
+bench/probe/
+bench/iter/
+bench/dim/
+# 干净 CODEX_HOME 实验环境
+cxhome/
+# 抓包原文（请求体原文）
+tools/captures/

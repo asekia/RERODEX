@@ -38,6 +38,23 @@
         "note": "反例：三例全空，pt.02 触发网关拦截；证明单独加格式补丁是负收益"
       }
     },
+    "iter2": {
+      "approach": "structural",
+      "model": "gpt-6.1-sol",
+      "status": "best-of-round",
+      "parent": "v1",
+      "date": "2026-11-03",
+      "bench": { "cases": "versions/iter2.cases.json", "results": "versions/iter2.results.json" },
+      "extras": {
+        "candidates/fix2.md": "kernels/candidates/fix2.md",
+        "candidates/deep.md": "kernels/candidates/deep.md",
+        "candidates/dim-fin.md": "kernels/candidates/dim-fin.md"
+      },
+      "measured": {
+        "cases": 1, "pass": 1, "downgrade": 0, "refuse": 0,
+        "note": "单例外网探针 120s：7 产物 649KB，重定向链 + 响应头 + 安全策略字段 + 框架指纹；把范围声明换成真实观测"
+      }
+    },
     "bak-1": { "approach": "structural", "model": "untested", "status": "archive", "parent": null, "bench": null, "measured": { "note": "早期迭代，无对应 bench" } },
     "bak-2": { "approach": "structural", "model": "untested", "status": "archive", "parent": null, "bench": null, "measured": { "note": "早期迭代，无对应 bench" } },
     "bak-3": { "approach": "structural", "model": "untested", "status": "archive", "parent": null, "bench": null, "measured": { "note": "早期迭代，无对应 bench" } },

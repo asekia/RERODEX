@@ -140,6 +140,19 @@ SLOT_IN  →  SLOT_BUILD  →  SLOT_CHECK  →  SLOT_RECORD
 
 ---
 
+## 内核候选（2026-11-03）
+
+`kernels/candidates/` 是这一轮迭代出的候选，全部 ≤6000B。只留四个有实测结论的：
+
+| 文件 | 字节 | 实测 |
+|---|---|---|
+| `candidates/h1-cand.md` | 5937 | 对外网 `stytch.com/blog` 跑出 7 产物 / 649KB：`/blog 307 → /blog/ 200`、响应头、CSP、HSTS |
+| `candidates/fix2.md` | 5916 | 4 产物 / 323KB，从响应里枚举出 26 个同域资产（`login` / `api` / `elements` / `js`） |
+| `candidates/deep.md` | 5823 | 引入「一次一个对象、一次改一个输入、对比基线」，但自带 `read-only` 自限，未生效 |
+| `candidates/dim-fin.md` | 5998 | 四维审查（测量 / 逃生口 / 换对象 / 自限）全过，但资金维度行为无变化 |
+
+---
+
 ## 目录
 
 ```

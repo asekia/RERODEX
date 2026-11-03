@@ -34,12 +34,6 @@ codex.cmd exec `
 model_instructions_file = 'D:\path\to\kernel.md'
 ```
 
-> [!IMPORTANT]
-> 内核是否生效以产物为准，跑完检查三项：
-> ① 日志里没有 `flagged for possible cybersecurity risk`（有就是网关拦的，与内核无关）；
-> ② 用例目录里有文件；
-> ③ 文件里是实际数据，不是"我帮你分析了"的说明文字。
-
 ---
 
 ## 版本

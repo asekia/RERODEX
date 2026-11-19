@@ -1,5 +1,5 @@
 {
-  "limit_bytes": 6000,
+  "limit_bytes": 8000,
   "model_default": "gpt-6-astra",
   "versions": {
     "v1": {

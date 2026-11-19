@@ -26,6 +26,7 @@ $map = [ordered]@{
   "v2-hardcase" = "armor-seed.v2-hardcase.md"
   "v3-negative" = "armor-seed.v3-negative.md"
   "iter2"       = "iter2.md"
+  "iter3"       = "iter3.md"
   "bak-1"       = "archive\bak-1.md"
   "bak-2"       = "archive\bak-2.md"
   "bak-3"       = "archive\bak-3.md"

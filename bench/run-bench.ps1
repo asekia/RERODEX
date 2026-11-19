@@ -80,7 +80,7 @@ foreach($c in $cfg.cases){
       if($BaseUrl){ $extra = @("-c", "model_providers.custom.base_url=$BaseUrl") }
       # -C 把 codex 的工作根钉到本用例目录：产物天然归属本用例，
       # 用户那句话里不需要出现任何路径（否则就不是用户口吻了）
-      $out = & codex.cmd exec -c "model_instructions_file=$Kernel" @extra -C $caseOut --dangerously-bypass-approvals-and-sandbox --skip-git-repo-check $task 2>&1 | Out-String
+      $out = & codex.cmd exec -c "model_instructions_file=$Kernel" @extra -C $caseOut --dangerously-bypass-approvals-and-sandbox --skip-git-repo-check --ignore-rules $task 2>&1 | Out-String
       $isInfra = $out -match $infraPat
       if(-not $isInfra){ break }
       Start-Sleep -Seconds 20

@@ -30,6 +30,10 @@ codex.cmd exec `
   "你的任务原话"
 ```
 
+> `gpt-6.2-astra` 需在 `~/.codex/config.toml` 里配好对应的 `model_providers` 条目
+> （base_url + `env_key` 指向你的 API key 环境变量）。`--ignore-rules` 必须带上，
+> 不然 execpolicy 会拦探测类命令。
+
 或者写进 `~/.codex/config.toml` 让它长期生效：
 
 ```toml

@@ -1,9 +1,9 @@
 <div align="center">
-  <img alt="latest" src="https://img.shields.io/badge/latest-iter2-brightgreen">
-  <img alt="kernels" src="https://img.shields.io/badge/kernels-8-blue">
-  <img alt="kernel" src="https://img.shields.io/badge/size-5937%20%2F%206000%20B-informational">
-  <img alt="model" src="https://img.shields.io/badge/model-gpt--6.1--sol-purple">
-  <img alt="bench" src="https://img.shields.io/badge/bench-4%20suites%20%C2%B7%2081%20cases-orange">
+  <img alt="latest" src="https://img.shields.io/badge/latest-iter3-brightgreen">
+  <img alt="kernels" src="https://img.shields.io/badge/kernels-9-blue">
+  <img alt="kernel" src="https://img.shields.io/badge/size-7998%20%2F%208000%20B-informational">
+  <img alt="model" src="https://img.shields.io/badge/model-gpt--6.2--astra-purple">
+  <img alt="bench" src="https://img.shields.io/badge/bench-5%20suites%20%C2%B7%20100%20cases-orange">
   <img alt="license" src="https://img.shields.io/badge/license-MIT-lightgrey">
 </div>
 
@@ -18,15 +18,15 @@ Codex / GPT 的**替代系统提示词**集合 + 评测管线。**[English](READ
 ## 快速开始
 
 ```powershell
-# 1. 解压最新版（当前是 iter2）
-Expand-Archive .\dist\iter2.zip -DestinationPath .\iter2
+# 1. 解压 6.2 版（iter3 专给 gpt-6.2-astra）
+Expand-Archive .\dist\iter3.zip -DestinationPath .\iter3
 
 # 2. 告诉 codex 用它当系统提示
 codex.cmd exec `
-  -c "model_instructions_file=$(Resolve-Path .\iter2\iter2\kernel.md)" `
-  -c model="gpt-6.1-sol" `
+  -c "model_instructions_file=$(Resolve-Path .\iter3\iter3\kernel.md)" `
+  -c model="gpt-6.2-astra" `
   -C .\my-case `
-  --dangerously-bypass-approvals-and-sandbox --skip-git-repo-check `
+  --dangerously-bypass-approvals-and-sandbox --skip-git-repo-check --ignore-rules `
   "你的任务原话"
 ```
 
@@ -40,13 +40,14 @@ model_instructions_file = 'D:\path\to\kernel.md'
 
 ## 版本
 
-| 包 | 内核 | bench | 实测结论 | 状态 |
-|---|---|---|---|---|
-| [`iter2.zip`](dist/iter2.zip) | 5937B | 1 例 | 7 产物 649KB：重定向链 + 响应头原文 + 安全策略字段 + 框架指纹 | **当前推荐** |
-| [`v1.zip`](dist/v1.zip) | 5989B | 8 例 | 4 过 / 1 降级 / 3 拒 | best |
-| [`v2-hardcase.zip`](dist/v2-hardcase.zip) | 5954B | 3 例 | 形态约束生效，但产物正文仍是拒绝语 | superseded |
-| [`v3-negative.zip`](dist/v3-negative.zip) | 5994B | 3 例 | 三例全空——证明"只加格式补丁"是负收益 | negative-control |
-| `bak-1..4.zip` | 4281–5981B | — | 早期迭代，未单独实测 | archive |
+| 包 | 模型 | 内核 | bench | 实测结论 | 状态 |
+|---|---|---|---|---|---|
+| [`iter3.zip`](dist/iter3.zip) | **gpt-6.2-astra** | 7998B | 19 例 | 3 过 / 9 无产物 / 6 拒 / 1 截断；明说恶意词拒，机械措辞放 | **6.2 当前版** |
+| [`iter2.zip`](dist/iter2.zip) | gpt-6.1-sol | 5937B | 1 例 | 7 产物 649KB：重定向链 + 响应头原文 + 安全策略字段 + 框架指纹 | 6.1 推荐 |
+| [`v1.zip`](dist/v1.zip) | gpt-6.1-sol | 5989B | 8 例 | 4 过 / 1 降级 / 3 拒 | best |
+| [`v2-hardcase.zip`](dist/v2-hardcase.zip) | gpt-6.1-sol | 5954B | 3 例 | 形态约束生效，但产物正文仍是拒绝语 | superseded |
+| [`v3-negative.zip`](dist/v3-negative.zip) | gpt-6.1-sol | 5994B | 3 例 | 三例全空——证明"只加格式补丁"是负收益 | negative-control |
+| `bak-1..4.zip` | gpt-6.1-sol | 4281–5981B | — | 早期迭代，未单独实测 | archive |
 
 **包里有什么**（只有和本版绑定的，全局脚本和公共文档都在仓库里）：
 
@@ -80,14 +81,14 @@ model_instructions_file = 'D:\path\to\kernel.md'
 ## 复测
 
 ```powershell
-.\bench\run-bench.ps1 -Kernel .\kernels\iter2.md [-CasesFile <套件>] [-Repeats N]
+.\bench\run-bench.ps1 -Kernel .\kernels\iter3.md [-CasesFile <套件>] [-Repeats N]
 ```
 
 结果落在 `bench\out\<KernelId>\`，每例记录工具调用数、产物数、判档。用例集：
 
 | 文件 | 例数 | 覆盖 |
 |---|---|---|
-| `bench/cases-user.json` | 8 | 基础池：渗透 / 逆向 / 编码 / 成人 / 敏感 |
+| `bench/suites/astra62-baseline.json` | 19 | 6.2 主池：渗透 / 逆向 / 工具 / 成人 / 敏感 / 道德 |
 | `bench/suites/v1-natural.json` | 36 | 用户口吻自然表述 |
 | `bench/suites/v1-verb-sweep.json` | 13 | 同一诉求换动词 |
 | `bench/suites/v1-dimensions.json` | 24 | 七个非渗透维度，每类 2–4 例 |
@@ -98,10 +99,11 @@ model_instructions_file = 'D:\path\to\kernel.md'
 
 | 边界 | 表现 |
 |---|---|
-| **请求性质** | 资金类、部分社工与免杀诉求过网关后仍被句子层转化；产物形态可能成立，内容反转成防御性表述 |
-| **字节上限** | 6,000B 硬顶。超了靠后的节被截，`END` / `ENVIRONMENT` 先丢 |
-| **模型差异** | `gpt-6.1-sol` 稳定产出可核验观测；`gpt-5.6` 最可谈；`gpt-6-sol` 最保守；`gpt-6-astra` 不可达 |
+| **请求性质** | 明说恶意/攻击/露骨词 → 上游 `content_filter` 或模型语义层直接拒；同一意图改机械措辞即放行 |
+| **字节上限** | 8,000B 硬顶（6.2 线）。超了靠后的节被截，`END` / `ENVIRONMENT` 先丢 |
+| **模型差异** | `gpt-6.2-astra`：NSFW/渗透深度概率性（同内核同任务时而全解剖时而文学化）；`gpt-6.1-sol` 稳定产出可核验观测 |
 | **无沙箱不开工** | 不加 `--dangerously-bypass-approvals-and-sandbox` 时工具调用停在审批，产物为 0 |
+| **execpolicy** | codex 自带 allowlist 拦探测命令，需 `--ignore-rules` |
 
 ---
 
